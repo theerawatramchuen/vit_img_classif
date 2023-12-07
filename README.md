@@ -3,6 +3,7 @@ Image Classification Using Vision transformer from Scractch
 
 ### Steps to follow:
 #### Installation:
+Anaconda Python Environment <br/>
 version is working for CPU or (GPU) <br/>
 Python 3.8 <br/>
 torchvision 0.16.1 <br/>
