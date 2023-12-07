@@ -1,4 +1,4 @@
-# Image-Classification-Using-Vision-transformer
+# Custom Image Classification Using Vision transformer
 Image Classification Using Vision transformer from Scractch
 
 ### Steps to follow:
