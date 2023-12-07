@@ -11,7 +11,7 @@ vit-pytorch 1.6.4 (https://pytorch.org/get-started/locally/) <br/>
 #### Setup
 1. Unzip "dataset_ebs.zip" (for your project it is your dataset zip file with subfolder is the image class name<br/>
 2. Run "dataset_spliter.ipynb" with editing dataset folder name and define the % of train and validation prior run<br/>
-3. Run "vit_img_classif.ipynb" for starting the model training, model weight saving and prediction <br/>
+3. Run "vit_ebs.ipynb" for starting the model training, model weight saving and prediction <br/>
 #### Reference: 
 https://github.com/AarohiSingla/Image-Classification-Using-Vision-transformer <br/>
 https://youtu.be/awyWND506NY <br/>
