@@ -1,5 +1,5 @@
 # Custom Image Classification Using Vision transformer
-Image Classification Using Vision transformer from Scractch
+Image Classification Using Vision transformer from pretrained weight
 
 ### Steps to follow:
 #### Installation:
