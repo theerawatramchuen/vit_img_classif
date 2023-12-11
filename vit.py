@@ -5,7 +5,7 @@ if len(sys.argv) > 1:
         print("python vit_ebs.py dataset_directory [weight_file]")
         sys.exit(1)
 else:
-    print ("Pls specific directory of the dataset")
+    print ("Pls specific directory of the dataset or 'python vit_ebs.py dataset_directory [weight_file]'")
     sys.exit(1)
 
 train_ratio = 0.75  # For instance 0.75 = 75% training and 25% validation
