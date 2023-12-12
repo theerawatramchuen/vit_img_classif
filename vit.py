@@ -1,17 +1,33 @@
-import sys
+
+def myhelp():
+    print ("")
+    print ("How to use Vision Transformer Image Classification...")
+    print ("1. Train custom model : python vit.py dataset_folder epoch_number")  # Done
+    print ("2. Train more epoch   : python vit.py dataset_folder epoch_number weight_filename") # Done
+    print ("3. Prediction         : python vit.py image_folder weight_filename")
+    print ("Note:")
+    print ("- Training and Validation image folder will be created in dataset folder with ratio 75/25")
+    print ("- Default epoch number is 100")
+    print ("- New model trained weight to be saved in dataset folder")
+    print ("")
+
+import sys, os
 if len(sys.argv) > 1:
-    dataset_dir = sys.argv[1] #"dataset_ebs" # Replace with your dataset path
+    dataset_dir = sys.argv[1] # dataset_folder
     if sys.argv[1] == '?':
-        print("python vit_ebs.py dataset_directory [weight_file]")
+        myhelp()
         sys.exit(1)
 else:
-    print ("Pls specific directory of the dataset or 'python vit_ebs.py dataset_directory [weight_file]'")
+    myhelp()
     sys.exit(1)
 
-train_ratio = 0.75  # For instance 0.75 = 75% training and 25% validation
-base_directory = dataset_dir  
 
-import os
+train_ratio = 0.75  # For instance 0.75 = 75% training and 25% validation
+myepoch = 100       # Default Epoch number
+
+base_directory = dataset_dir  
+NUM_WORKERS = os.cpu_count()
+
 import shutil
 from sklearn.model_selection import train_test_split
 
@@ -49,7 +65,6 @@ from helper_functions import set_seeds
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-NUM_WORKERS = os.cpu_count()
 
 def get_subfolders(directory_path):
     """Return a list of subfolder names in the given directory."""
@@ -96,12 +111,21 @@ def create_dataloaders(
     return train_dataloader, test_dataloader, class_names
 
 def main():
+    user_epoch = myepoch
+    if len(sys.argv) > 2:
+        user_epoch = sys.argv[2]
+        if not user_epoch.isnumeric():
+            user_epoch = myepoch
+        else:
+            user_epoch = eval(sys.argv[2])
+    
     ######################################################################
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    device
+    print ("Device is " + device)
     ######################################################################
     
     class_names = get_subfolders(dataset_dir + '/_train')
+    print("Class names :")
     print(class_names)
     ######################################################################
     # 1. Get pretrained weights for ViT-Base
@@ -143,7 +167,56 @@ def main():
                                                                                                 batch_size=32)
     ######################################################################
 
-    if len(sys.argv) < 3 : # Not specific weight filename 
+    if len(sys.argv) > 3 : # Train more epoch on specific weight file
+        # Load the model weights 
+        filename = dataset_dir + "/" + sys.argv[3] # saved weight filename
+        loaded_weights = torch.load(filename)
+
+        # load the weights 
+        pretrained_vit.load_state_dict(loaded_weights)
+
+        from going_modular.going_modular import engine
+
+        # Create optimizer and loss function
+        optimizer = torch.optim.Adam(params=pretrained_vit.parameters(), lr=1e-3)
+        loss_fn = torch.nn.CrossEntropyLoss()
+
+        print (len(sys.argv))
+        print ("Epoch = " + str(user_epoch))
+        print ("Weight file = " + filename)
+#        sys.exit(1)
+
+        # Train the classifier head of the pretrained ViT feature extractor model
+        set_seeds()
+        pretrained_vit_results = engine.train(model=pretrained_vit,
+                                            train_dataloader=train_dataloader_pretrained,
+                                            test_dataloader=test_dataloader_pretrained,
+                                            optimizer=optimizer,
+                                            loss_fn=loss_fn,
+                                            epochs=user_epoch,
+                                            device=device)
+
+        ######################################################################
+        # Plot the loss curves
+        from helper_functions import plot_loss_curves
+
+        plot_loss_curves(pretrained_vit_results) 
+        ######################################################################
+
+        # Save trainend weight
+
+        # Get current datetime to use in filename
+        now = datetime.datetime.now()
+        filename = dataset_dir + "/" + now.strftime("%Y%m%d-%H%M%S") + "_model.pth"
+
+        # Save the model weights to disk
+        torch.save(pretrained_vit.state_dict(), filename)
+
+    print (len(sys.argv))
+    print ("Epoch = " + str(user_epoch))
+#    sys.exit(1)
+
+    if len(sys.argv) < 4 : # Not specific weight filename 
         from going_modular.going_modular import engine
 
         # Create optimizer and loss function
@@ -157,7 +230,7 @@ def main():
                                             test_dataloader=test_dataloader_pretrained,
                                             optimizer=optimizer,
                                             loss_fn=loss_fn,
-                                            epochs=1,
+                                            epochs=user_epoch,
                                             device=device)
         
         ######################################################################
@@ -176,13 +249,6 @@ def main():
         # Save the model weights to disk
         torch.save(pretrained_vit.state_dict(), filename)
 
-    # Load the model weights 
-    if len(sys.argv) > 2:
-        filename = dataset_dir + "/" + sys.argv[2] # saved weight filename
-    loaded_weights = torch.load(filename)
-
-    # load the weights 
-    pretrained_vit.load_state_dict(loaded_weights)
 
     # Setup custom image path
     custom_image_path = 'P2-034.jpg'
