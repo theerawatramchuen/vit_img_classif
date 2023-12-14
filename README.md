@@ -13,7 +13,7 @@ scikit-learn <br/>
 mathplotlib <br/>
 
 #### Setup:
-1. Unzip "dataset_ebs.zip" (for your project it is your dataset zip file with subfolder is the image class name<br/>
+1. Unzip "dataset_ebs.zip" (for your project it is your dataset zip file with subfolder is the image class name)<br/>
 2. Run "dataset_spliter.ipynb" with editing dataset folder name and define the % of training and validation in the 1st cell prior run <br/>
 3. Run "vit_ebs.ipynb" with editing dataset directory in the 3th cell prior run for the model training, model weight saving and prediction sample images<br/>
 #### Reference: 
