@@ -4,7 +4,7 @@ def myhelp():
     print ("How to use Vision Transformer Image Classification...")
     print ("1. Train custom model : python vit.py dataset_folder epoch_number")  # Done
     print ("2. Train more epoch   : python vit.py dataset_folder epoch_number weight_filename") # Done
-    print ("3. Prediction         : python vit.py image_folder weight_filename")
+#    print ("3. Prediction         : python vit.py image_folder p weight_filename")
     print ("Note:")
     print ("- Training and Validation image folder will be created in dataset folder with ratio 75/25")
     print ("- Default epoch number is 100")
@@ -65,7 +65,6 @@ from helper_functions import set_seeds
 from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
 
-
 def get_subfolders(directory_path):
     """Return a list of subfolder names in the given directory."""
     subfolders = []
@@ -110,9 +109,26 @@ def create_dataloaders(
 
     return train_dataloader, test_dataloader, class_names
 
+
+import pandas as pd
+import glob
+
+def list_images_in_folder_with_pandas(folder_path):
+    images = []
+    for extension in ['*.png', '*.jpg', '*.jpeg', '*.gif', '*.bmp']:
+        images.extend(glob.glob(os.path.join(folder_path, '**', extension), recursive=True))
+    
+    # Creating a DataFrame
+    df = pd.DataFrame(images, columns=['Image_Path'])
+    return df
+
+# folder_name = "path_to_your_folder"  # Replace with your folder path
+# image_df = list_images_in_folder_with_pandas(folder_name)
+
+
 def main():
     user_epoch = myepoch
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 2 :
         user_epoch = sys.argv[2]
         if not user_epoch.isnumeric():
             user_epoch = myepoch
@@ -249,7 +265,6 @@ def main():
         # Save the model weights to disk
         torch.save(pretrained_vit.state_dict(), filename)
 
-
     # Setup custom image path
     custom_image_path = 'P2-034.jpg'
 
@@ -269,6 +284,8 @@ def main():
     pred_and_plot_image(model=pretrained_vit,
                         image_path=custom_image_path,
                         class_names=class_names)
+    
+
 
 if __name__ == "__main__":
     if not os.path.exists(dataset_dir + '/_train'):
